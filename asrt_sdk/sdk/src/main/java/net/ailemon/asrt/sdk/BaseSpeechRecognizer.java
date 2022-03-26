@@ -1,9 +1,10 @@
+package net.ailemon.asrt.sdk;
 
-import AsrtApiModel.AsrtApiSpeechRequest;
-import AsrtApiModel.AsrtApiLanguageRequest;
-import AsrtApiModel.AsrtApiResponse;
-import AsrtApiModel.Wave;
-import common.Common;
+import net.ailemon.asrt.sdk.models.AsrtApiSpeechRequest;
+import net.ailemon.asrt.sdk.models.AsrtApiLanguageRequest;
+import net.ailemon.asrt.sdk.models.AsrtApiResponse;
+import net.ailemon.asrt.sdk.models.Wave;
+import net.ailemon.asrt.sdk.common.Common;
 
 public abstract class BaseSpeechRecognizer {
     protected String host = "";

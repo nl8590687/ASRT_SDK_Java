@@ -1,4 +1,4 @@
-package common;
+package net.ailemon.asrt.sdk.common;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Base64;

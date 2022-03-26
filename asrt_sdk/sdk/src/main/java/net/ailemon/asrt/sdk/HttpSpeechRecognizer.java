@@ -1,8 +1,9 @@
+package net.ailemon.asrt.sdk;
 
-import AsrtApiModel.AsrtApiSpeechRequest;
-import AsrtApiModel.AsrtApiLanguageRequest;
-import AsrtApiModel.AsrtApiResponse;
-import common.Http;
+import net.ailemon.asrt.sdk.models.AsrtApiSpeechRequest;
+import net.ailemon.asrt.sdk.models.AsrtApiLanguageRequest;
+import net.ailemon.asrt.sdk.models.AsrtApiResponse;
+import net.ailemon.asrt.sdk.common.Http;
 
 public class HttpSpeechRecognizer extends BaseSpeechRecognizer {
     public String subPath = "";

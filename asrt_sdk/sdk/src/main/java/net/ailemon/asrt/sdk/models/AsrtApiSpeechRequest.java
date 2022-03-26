@@ -1,6 +1,6 @@
-package AsrtApiModel;
+package net.ailemon.asrt.sdk.models;
 
-import common.Common;
+import net.ailemon.asrt.sdk.common.Common;
 
 public class AsrtApiSpeechRequest {
     private byte[] samples;

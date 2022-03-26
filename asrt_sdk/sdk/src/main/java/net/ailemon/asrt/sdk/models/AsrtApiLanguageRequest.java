@@ -1,4 +1,4 @@
-package AsrtApiModel;
+package net.ailemon.asrt.sdk.models;
 
 import com.google.gson.Gson;
 

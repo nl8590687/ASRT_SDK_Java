@@ -1,8 +1,11 @@
-import AsrtApiModel.AsrtApiResponse;
-import common.Common;
+package net.ailemon.asrt.sdk;
+
+import net.ailemon.asrt.sdk.models.AsrtApiResponse;
+import net.ailemon.asrt.sdk.common.Common;
+import net.ailemon.asrt.sdk.models.Wave;
 
 public class Sdk {
-    // GetSpeechRecognizer 获取一个ASRT语音识别类实例化对象
+    // GetSpeechRecognizer 鑾峰彇涓�涓狝SRT璇煶璇嗗埆绫诲疄渚嬪寲瀵硅薄
     public static BaseSpeechRecognizer GetSpeechRecognizer(String host, String port, String protocol) {
         if("http".equals(protocol) || "https".equals(protocol)){
             return HttpSpeechRecognizer.newHttpSpeechRecognizer(host, port, protocol, "");
@@ -20,16 +23,16 @@ public class Sdk {
             filename = args[0];
         }
         // ============================================
-        // 直接调用ASRT识别语音文件
+        // 鐩存帴璋冪敤ASRT璇嗗埆璇煶鏂囦欢
         AsrtApiResponse rsp = sr.RecogniteFile(filename);
         System.out.println(rsp.statusCode);
         System.out.println(rsp.statusMessage);
         System.out.println(rsp.result);
 
         // ============================================
-        // 调用ASRT识别语音序列
+        // 璋冪敤ASRT璇嗗埆璇煶搴忓垪
         byte[] wavBytes = Common.readBinFile(filename);
-        AsrtApiModel.Wave wav = new AsrtApiModel.Wave();
+        Wave wav = new Wave();
         wav.deserialize(wavBytes);
         byte[] sampleBytes = wav.getRawSamples();
         int sampleRate = wav.sampleRate;
@@ -41,9 +44,9 @@ public class Sdk {
         System.out.println(rsp.result);
 
         // ============================================
-        // 调用ASRT声学模型识别语音序列
+        // 璋冪敤ASRT澹板妯″瀷璇嗗埆璇煶搴忓垪
         wavBytes = Common.readBinFile(filename);
-        wav = new AsrtApiModel.Wave();
+        wav = new Wave();
         wav.deserialize(wavBytes);
         sampleBytes = wav.getRawSamples();
         sampleRate = wav.sampleRate;
@@ -55,7 +58,7 @@ public class Sdk {
         System.out.println(rsp.result);
 
         // ============================================
-        // 调用ASRT语言模型识别拼音序列1
+        // 璋冪敤ASRT璇█妯″瀷璇嗗埆鎷奸煶搴忓垪1
         String[] pinyins = ((String)rsp.result).split(", ");
         rsp = sr.RecogniteLanguage(pinyins);
         System.out.println(rsp.statusCode);
@@ -63,7 +66,7 @@ public class Sdk {
         System.out.println(rsp.result);
 
         // ============================================
-        // 调用ASRT语言模型识别拼音序列2
+        // 璋冪敤ASRT璇█妯″瀷璇嗗埆鎷奸煶搴忓垪2
         pinyins = new String[]{"ni3", "hao3", "a1"};
         rsp = sr.RecogniteLanguage(pinyins);
         System.out.println(rsp.statusCode);
