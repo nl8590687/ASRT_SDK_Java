@@ -16,7 +16,7 @@ public class Wave {
         this.sampleRate = sampleRate;
         this.channels = channels;
         this.sampleWidth = sampleWidth;
-        // short[] 杞� byte[]
+        // short[] 转 byte[]
         this.sampleBytes = this.samplesToBytes(samples);
     }
 
@@ -25,7 +25,7 @@ public class Wave {
         this.sampleRate = sampleRate;
         this.channels = channels;
         this.sampleWidth = sampleWidth;
-        // byte[] 杞� short[]
+        // byte[] 转 short[]
         this.samples = this.bytesToSamples(sampleBytes);
     }
 
@@ -41,7 +41,7 @@ public class Wave {
 
             byte[] fmtID = new byte[4];
             byte[] cksize = new byte[4];
-            int waveType = 0; // 鏃犵鍙穒nt鏁存暟锛屽湪鑾峰彇鏃堕渶瑕佽繘琛屽瓧鑺傝浆鐮� (Byte.toUnsignedInt(byte x))
+            int waveType = 0; // 无符号int整数，在获取时需要进行字节转码 (Byte.toUnsignedInt(byte x))
             byte[] channel = new byte[2];
             byte[] sample_rate = new byte[4];
             byte[] bytespersec = new byte[4];
@@ -49,32 +49,32 @@ public class Wave {
             byte[] bitNum = new byte[2];
             byte[] unknown = new byte[2];
             byte[] dataID = new byte[4];  //52
-            byte[] dataLength = new byte[4];  //56 涓瓧鑺�
+            byte[] dataLength = new byte[4];  //56 个字节
 
-            int p = 0; //妯℃嫙娴佺殑鎸囬拡浣嶇疆
+            int p = 0; //模拟流的指针位置
 
             System.arraycopy(wavBytes, p, riff, 0, 4); // RIFF
             p += 4;
 
             if (DataParseUtils.convertFoutUnsignLong(riff[3], riff[2], riff[1], riff[0]) != 0x52494646) //0x52494646
             {
-                Exception e = new Exception("璇ユ枃浠朵笉鏄疻AVE鏂囦欢");
+                Exception e = new Exception("该文件不是WAVE文件");
                 throw e;
             }
             //System.out.println("test");
 
             /*if (riff[0]!=82 || riff[1]!=73  || riff[2]!=70  || riff[3]!=70) //0x52494646
             {
-                Exception e = new Exception("璇ユ枃浠朵笉鏄疻AVE鏂囦欢");
+                Exception e = new Exception("该文件不是WAVE文件");
                 throw e;
             }*/
 
-            System.arraycopy(wavBytes, p, riffSize, 0, 4); // 鏂囦欢鍓╀綑闀垮害
+            System.arraycopy(wavBytes, p, riffSize, 0, 4); // 文件剩余长度
             p += 4;
 
             if (DataParseUtils.convertFoutUnsignLong(riffSize[3], riffSize[2], riffSize[1], riffSize[0]) != wavBytes.length - p)
             {
-                //Exception e = new Exception("璇AVE鏂囦欢鎹熷潖锛屾枃浠堕暱搴︿笌鏍囪涓嶄竴鑷�");
+                //Exception e = new Exception("该WAVE文件损坏，文件长度与标记不一致");
                 //throw e;
             }
 
@@ -84,7 +84,7 @@ public class Wave {
 
             if (DataParseUtils.convertFoutUnsignLong(waveID[3], waveID[2], waveID[1], waveID[0]) != 0x57415645)
             {
-                Exception e = new Exception("璇ユ枃浠朵笉鏄疻AVE鏂囦欢");
+                Exception e = new Exception("该文件不是WAVE文件");
                 throw e;
             }
             //System.out.println("test2");
@@ -95,7 +95,7 @@ public class Wave {
 
             if (DataParseUtils.convertFoutUnsignLong(tmp[3], tmp[2], tmp[1], tmp[0]) == 0x4A554E4B)
             {
-                //鍖呭惈junk鏍囪鐨剋av
+                //包含junk标记的wav
                 junkID = tmp;
                 hasjunk = true;
 
@@ -107,11 +107,11 @@ public class Wave {
                 long junklen = DataParseUtils.convertFoutUnsignLong(junklength[3], junklength[2], junklength[1], junklength[0]);
 
 
-                //灏嗕笉瑕佺殑junk閮ㄥ垎璇诲嚭
+                //将不要的junk部分读出
                 //bread.ReadBytes((int)junklen);
                 p += (int)junklen;
 
-                //璇籪mt 鏍囪
+                //读fmt 标记
                 //fmtID = bread.ReadBytes(4);
                 System.arraycopy(wavBytes, p, fmtID, 0, 4);
                 p += 4;
@@ -122,7 +122,7 @@ public class Wave {
             }
             else
             {
-                Exception e = new Exception("鏃犳硶鎵惧埌WAVE鏂囦欢鐨刯unk鍜宖mt鏍囪");
+                Exception e = new Exception("无法找到WAVE文件的junk和fmt标记");
                 throw e;
             }
             //System.out.println("test2.3");
@@ -130,8 +130,8 @@ public class Wave {
 
             if (DataParseUtils.convertFoutUnsignLong(fmtID[3], fmtID[2], fmtID[1], fmtID[0]) != 0x666D7420)
             {
-                //fmt 鏍囪
-                Exception e = new Exception("鏃犳硶鎵惧埌WAVE鏂囦欢fmt鏍囪");
+                //fmt 标记
+                Exception e = new Exception("无法找到WAVE文件fmt标记");
                 throw e;
             }
             //System.out.println("test2.4");
@@ -151,34 +151,34 @@ public class Wave {
 
             if (waveType != 1)
             {
-                // 闈瀙cm鏍煎紡锛屾殏涓嶆敮鎸�
-                Exception e = new Exception("WAVE鏂囦欢涓嶆槸pcm鏍煎紡锛屾殏鏃朵笉鏀寔");
+                // 非pcm格式，暂不支持
+                Exception e = new Exception("WAVE文件不是pcm格式，暂时不支持");
                 throw e;
             }
 
-            //澹伴亾鏁�
+            //声道数
             //channel = bread.ReadBytes(2);
             System.arraycopy(wavBytes, p, channel, 0, 2);
             p += 2;
 
-            //閲囨牱棰戠巼
+            //采样频率
             //sample_rate = bread.ReadBytes(4);
             System.arraycopy(wavBytes, p, sample_rate, 0, 4);
             p += 4;
 
             int fs = (int)DataParseUtils.convertFoutUnsignLong(sample_rate[0], sample_rate[1], sample_rate[2], sample_rate[3]);
 
-            //姣忕閽熷瓧鑺傛暟
+            //每秒钟字节数
             //bytespersec = bread.ReadBytes(4);
             System.arraycopy(wavBytes, p, bytespersec, 0, 4);
             p += 4;
 
-            //姣忔閲囨牱鐨勫瓧鑺傚ぇ灏忥紝2涓哄崟澹伴亾锛�4涓虹珛浣撳０閬�
+            //每次采样的字节大小，2为单声道，4为立体声道
             //blocklen_sample = bread.ReadBytes(2);
             System.arraycopy(wavBytes, p, blocklen_sample, 0, 2);
             p += 2;
 
-            //姣忎釜澹伴亾鐨勯噰鏍风簿搴︼紝榛樿16bit
+            //每个声道的采样精度，默认16bit
             //bitNum = bread.ReadBytes(2);
             System.arraycopy(wavBytes, p, bitNum, 0, 2);
             p += 2;
@@ -186,7 +186,7 @@ public class Wave {
             //tmp = bread.ReadBytes(2);
             System.arraycopy(wavBytes, p, tmp, 0, 2);
             p += 2;
-            //瀵绘壘da鏍囪
+            //寻找da标记
             while (DataParseUtils.convertTwoUnsignInt(tmp[1], tmp[0]) != 0x6461)
             {
                 //tmp = bread.ReadBytes(2);
@@ -200,12 +200,12 @@ public class Wave {
 
             if (DataParseUtils.convertTwoUnsignInt(tmp[1], tmp[0]) != 0x7461)
             {
-                //ta鏍囪
-                Exception e = new Exception("鏃犳硶鎵惧埌WAVE鏂囦欢data鏍囪");
+                //ta标记
+                Exception e = new Exception("无法找到WAVE文件data标记");
                 throw e;
             }
 
-            //wav鏁版嵁byte闀垮害
+            //wav数据byte长度
             byte[] data_size_byte = new byte[4];
 
             System.arraycopy(wavBytes, p, data_size_byte, 0, 4);
@@ -213,7 +213,7 @@ public class Wave {
 
             long DataSize = DataParseUtils.convertFoutUnsignLong(data_size_byte[0], data_size_byte[1], data_size_byte[2], data_size_byte[3]);
             //System.out.println("test3");
-            //璁＄畻鏍锋湰鏁�
+            //计算样本数
             long NumSamples = (long)DataSize / 2;
 
             if (NumSamples == 0)
@@ -230,7 +230,7 @@ public class Wave {
 
             for (int i = 0; i < NumSamples; i++)
             {
-                //璇诲叆2瀛楄妭鏈夌鍙锋暣鏁�
+                //读入2字节有符号整数
                 //data[i] = bread.ReadInt16();
                 byte[] tmp_sample = new byte[2];
                 System.arraycopy(wavBytes, p, tmp_sample, 0, 2);
@@ -284,7 +284,7 @@ public class Wave {
         short[] data = new short[sampleBytes.length / 2];
         for (int i = 0; i < sampleBytes.length / 2; i++)
         {
-            //璇诲叆2瀛楄妭鏈夌鍙锋暣鏁�
+            //读入2字节有符号整数
             //data[i] = bread.ReadInt16();
             byte[] tmp_sample = new byte[2];
             System.arraycopy(sampleBytes, 2 * i, tmp_sample, 0, 2);
@@ -296,21 +296,21 @@ public class Wave {
 
 class DataParseUtils {
     /**
-     * 鏈夌鍙凤紝int 鍗� 2 涓瓧鑺�
+     * 有符号，int 占 2 个字节
      */
     public static int convertTwoSignInt(byte b1, byte b2) { // signed
         return (b2 << 8) | (b1 & 0xFF);
     }
 
     /**
-     * 鏈夌鍙�, int 鍗� 4 涓瓧鑺�
+     * 有符号, int 占 4 个字节
      */
     public static int convertFourSignInt(byte b1, byte b2, byte b3, byte b4) {
         return (b4 << 24) | (b3 & 0xFF) << 16 | (b2 & 0xFF) << 8 | (b1 & 0xFF);
     }
 
     /**
-     * 鏃犵鍙凤紝int 鍗� 2 涓瓧鑺�
+     * 无符号，int 占 2 个字节
      */
     public static int convertTwoUnsignInt(byte b1, byte b2)      // unsigned
     {
@@ -318,7 +318,7 @@ class DataParseUtils {
     }
 
     /**
-     * 鏃犵鍙�, int 鍗� 4 涓瓧鑺�
+     * 无符号, int 占 4 个字节
      */
     public static long convertFoutUnsignLong(byte b1, byte b2, byte b3, byte b4) {
         return (long) (b4 & 0xFF) << 24 | (b3 & 0xFF) << 16 | (b2 & 0xFF) << 8 | (b1 & 0xFF);
