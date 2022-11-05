@@ -1,27 +1,25 @@
-/**
- * 
- */
-package asrtcli;
+package net.ailemon.asrt;
 
 import net.ailemon.asrt.sdk.*;
 import net.ailemon.asrt.sdk.models.*;
 import net.ailemon.asrt.sdk.common.*;
+
 /**
  * @author ailemon
  *
  */
-public class Main {
+public class App {
 
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-		String host = "127.0.0.1";
+    /**
+     * @param args
+     */
+    public static void main(String[] args) {
+        // TODO Auto-generated method stub
+        String host = "127.0.0.1";
         String port = "20001";
         String protocol = "http";
         BaseSpeechRecognizer sr = Sdk.GetSpeechRecognizer(host, port, protocol);
-        String filename = "C:\\Users\\ailemon\\Desktop\\data.wav";
+        String filename = "data.wav";
         if(args.length > 0){
             filename = args[0];
         }
@@ -75,7 +73,5 @@ public class Main {
         System.out.println(rsp.statusCode);
         System.out.println(rsp.statusMessage);
         System.out.println(rsp.result);
-
-	}
-
+    }
 }
